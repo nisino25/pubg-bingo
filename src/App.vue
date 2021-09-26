@@ -66,7 +66,7 @@
         <h1 style="marginTop:-10px">Welcome to PUBG Bingo!</h1>
         <button v-if="showingBingo" @click="mixList" class="startButton">Shuffle the list</button>
         <button v-if="showingBingo" @click="startEditing()" class="editBtn rightBtn">Edit the task-list</button>
-
+ 
       </div>
 
       <div id="content" v-if="!editing">
