@@ -6,6 +6,7 @@
     <link href='https://fonts.googleapis.com/css?family=Cambay' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
   <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 
   <title>Bingo</title>
 
@@ -16,8 +17,16 @@
   </head>
 
   <body>
+    
 
     <div id="container">
+
+      <div class="view-counter" style="left:0; position: absolute; margin-left: 50px">
+        <i class="far fa-eye" id="togglePassword" style="margin-right: 7.5px; cursor: pointer;"></i>
+        <vue3-autocounter class="counter" ref='counter' :startAmount='0'  suffix=' Views' :endAmount="userNum" :duration='1.5'  separator=',' :autoinit='true' />
+      </div>
+
+
       <div v-if="editing" style="color:Black; backgroundColor:MintCream; margin-top:10px">
           <h2 style=" color:black; left:0; ">Editing List ...</h2>
 
@@ -25,6 +34,7 @@
             <input type="text" id="myInput" placeholder="Type new task " v-model="inputText">
             <span @click="addTask()" class="addBtn">Add</span>
             <span @click="showingBingo = false; editing = false" class="backBtn">Back to menu</span>
+            <span @click="resetList" class="resetBtn">Reset</span>
           </div>
 
           <hr >
@@ -47,24 +57,12 @@
           </table>
 
 
-         
-
-          
-
-          
-          <!-- <ul v-for="(bingo, i) in candidate" :key="i" >
-            <span>{{i}}: {{bingo}}</span>
-          </ul> -->
-
-          
-          <!-- we need counting like how many we got, add button delete button -->
-          <!-- After editing your bingo gonna be reset  -->
-
       </div>
 
-      <div id="header" v-if="!editing">
-        <h1 style="marginTop:-10px">Welcome to PUBG Bingo!</h1>
-        <button v-if="showingBingo" @click="mixList" class="startButton">Shuffle the list</button>
+      <div id="header" v-if="!editing" class="firstDiv">
+        
+        <h1 style="">Welcome to PUBG Bingo!</h1>
+        <button v-if="showingBingo" @click="mixList" class="startButton">Reset the bingo</button>
         <button v-if="showingBingo" @click="startEditing()" class="editBtn rightBtn">Edit the task-list</button>
  
       </div>
@@ -72,6 +70,12 @@
       <div id="content" v-if="!editing">
         <button v-if="!showingBingo" @click="mixList" class="startButton">Click here to Start!</button>
         <button v-if="!showingBingo" @click="editing = true" class="editBtn">Edit the task-list</button>
+        <!-- <h2 v-if="userNum !== 0 && !showingBingo">{{userNum}}</h2> -->
+
+        
+        
+
+        
 
 
 
@@ -129,13 +133,18 @@
   
 </template>
 
-
 <script>
+import db from "./firebase.js"
+// import { VueNumber } from 'VueNumber'
+import { defineComponent } from 'vue';
+import Vue3autocounter from 'vue3-autocounter';
 
-
-export default {
+export default defineComponent({ 
   name: 'App',
   components: {
+    'vue3-autocounter': Vue3autocounter
+ 
+    // VueFrappe,
   },
   data(){
     return{
@@ -147,16 +156,22 @@ export default {
 
       candidate: [],
       usedNumList: [],
+      originalList: [],
 
       isItBingo: [],
       editing: false,
       inputText: '',
+      firstTime: true,
+
+      fireData:[],
+      userNum: 0,
 
     }
     
   },
   methods:{
     mixList(){
+      
       
 
       let i = 0;
@@ -218,7 +233,19 @@ export default {
       this.showingBingo = true
       this.resetBingo()
 
-      // console.log(this.isItBingo)
+      // this.firs
+
+      setTimeout(function () {
+        if(!localStorage.firstTime){
+          alert("Click each box to finish the task!");
+        }
+        this.firstTime = false
+        localStorage.firstTime = JSON.stringify(this.firstTime); 
+        // this.firstTime = true
+        
+      }, 1000)
+
+      
     },
 
     resetBingo(){
@@ -314,10 +341,100 @@ export default {
       this.editing = true
     },
 
+    resetList(){
+      let r= confirm(`Reseting the list to the default `);
+      if(!r){
+        return;
+      }
+
+      this.candidate =['Sniper kill with red dot','Nade kill','300m kill','Handgun kill','No gears throughout the game','Revive teammate','Be the first team to loot 3 air drops','Get ggs from dead players','Flash and steal kill from other team','Kill a player with intersting name','Get a 8x scope','Land on a roof','Kill within 30 seconds after you land','Get a shot on a pan from enemy','Get 10 kills','Use no energy drinks','Chiken dinner','Kill from moving vehicle','Kill enemy in the same house',"Find someone who don't know Chocotaco",'No cursing from enemy throughout the game','kill enemy with 5 diffrent weapons','Kill with a sniper without a miss','Force enemy to use smoke',"Get damages from enemy's grande and survive",'Drive with broken wheel','find naked player','Use no backpack','Get a shot on your head from enemy sniper and survive','Get flash greanaded from enenymy and surive','Sniper chiken dinneer','Spot a glitch',"don't let your teammate get knocked down",'Kill while in the air','Clutch 1 vs multiple','Put a vehicle in the building','Destroy a vehicle','Get a ghilie suit','Burst gun kill','back flip with vehicle',`Get a location of downed enemy's teammate`,'Kill a swimmer','Use only bandages','Use only drinks','Get a skinned gun','No healing throughout the game','use only the first weapon you find','Have identical weapons as a team']
+    },
+
+    async getMasterData(){
+      // this.gettingLists = true
+      // this.favCount = 0
+      // this.pastCount = 0
+      // this.visitCount = 0
+      // this.futureCount= 0
+
+      let fireData = undefined
+      
+      this.refMain = db.collection("maindata").doc('counter')
+      this.refMain.get().then((doc) => {
+        if (doc.exists) {
+          fireData = doc.data()
+          console.log(fireData)
+
+          // // this.updatedMainDataLists = [0,0,0,0]
+          // console.log(this.updatedMainDataLists)
+          // console.log('--------------------')
+          // let i = 0;
+          // // [0] total user num
+          // for (i in this.mainDataLists){
+          //   this.mainLoopCount++
+          // }
+          // // this.updatedMainDataLists[0]= loopCount
+          // i= 0
+          // for (i in this.mainDataLists){
+          //   this.visitCount =this.visitCount + this.mainDataLists[i][0]
+          // }
+          // // [1] favs
+          // i= 0
+          // for (i in this.mainDataLists){
+          //   this.favCount =this.favCount + this.mainDataLists[i][1]
+          // }
+          // // this.updatedMainDataLists[1]=this.favCount
+          // // [2] past
+          // i= 0
+          // for (i in this.mainDataLists){
+          //   this.pastCount = this.pastCount + this.mainDataLists[i][2]
+          // }
+          // // this.updatedMainDataLists[2]=this.pastCount
+          // // [3] past
+          // i= 0
+          // for (i in this.mainDataLists){
+          //   this.futureCount = this.futureCount + this.mainDataLists[i][3]
+          // }
+          // // this.updatedMainDataLists[3]=this.futureCount
+          // // -------------------------------------
+          
+        }
+        // let randomLists = [this.visitCount,this.favCount, this.pastCount, this.futureCount,this.mainLoopCount]
+        // this.updatedMainDataLists = randomLists
+        // console.log(this.mainDataLists)
+        // console.log(this.updatedMainDataLists)
+        // this.gettingLists = false
+      })
+       
+    },
+
+    theFormat(number) {
+            return number.toFixed(2);
+        },
+        completed() {
+            console.log('Animation ends!');
+        },
+        playAnimation() {
+            this.$refs.number2.play()
+        }
+
+  
+
     
   },
 
   mounted(){
+   db.collection("user-counter")
+     .get()
+     .then((querySnapshot) => {
+       querySnapshot.forEach((doc) => {
+         console.log(`${doc.id} => ${doc.data().TotalNum}`)
+         this.fireData.push(doc.data().TotalNum)
+         this.userNum = doc.data().TotalNum + 1
+
+       })
+     })
+
 
     // Setup for opponent team which is red team
 
@@ -351,9 +468,12 @@ export default {
     
     
   },
-
-
+  
   created(){
+    // localStorage.firstTime = JSON.stringify(this.candidate); 
+    if(localStorage.firstTime){
+      this.firstTime = JSON.parse(localStorage.firstTime);
+    }
 
     if (localStorage.candidate) {
       this.candidate = JSON.parse(localStorage.candidate);
@@ -362,7 +482,9 @@ export default {
       console.log('welcome new user')
     
 
-    this.candidate =['Sniper kill with red dot','Nade kill','300m kill','Handgun kill','No gears','3 kills in gulag','Revive teammate','First team to loot 3 air drops','ggs from dead player','Flash and steal kill from other team','Kill a player with intersting name','Kill a female player and confirm it though voice chat','8x scope','Land on a roof','Kill within 1 minute after you land','Get a shot on a pan from enemy','10 kills ','no drinks','Chiken dinner','Kill from moving vehicle','within 5m kill',"Find someone who don't know Choco",'No cursing from enemy throughout the game','kill enemy with 5 diffrent weapons','Snipe with only one bullet no misses are allowed','Make enemy use smoke',"touch enemy's grande and survive",'use a vehicle with broken wheel','find naked player','no backpack','get sniping headshot and survive','get flash greanaded and surive','sniper chiken dinneer','witness a glitch',"don't let your teammate down",'jump kill','clutch 1 vs multiple','put vehicle in the building','destroy a vehicle','get a ghilie suit','panzer kill','burst gun kill','back flip with vehicle','crush game and survive','interigate downed player succesfully','kill a swimmer','only bandage','only drinks','kill inside of the buiding','parachute kill','crouch on dead body and trigger them','get knoked out from red zone','get a skinned gun','Steal outfit 5x','no healing at all','use only the first weapon','Have identical weapons as a team','make fire sound every 30 seconds','outsmart enemy','call airdrop with count']
+    this.candidate =['Sniper kill with red dot','Nade kill','300m kill','Handgun kill','No gears throughout the game','Revive teammate','Be the first team to loot 3 air drops','Get ggs from dead players','Flash and steal kill from other team','Kill a player with intersting name','Get a 8x scope','Land on a roof','Kill within 30 seconds after you land','Get a shot on a pan from enemy','Get 10 kills','Use no energy drinks','Chiken dinner','Kill from moving vehicle','Kill enemy in the same house',"Find someone who don't know Chocotaco",'No cursing from enemy throughout the game','kill enemy with 5 diffrent weapons','Kill with a sniper without a miss','Force enemy to use smoke',"Get damages from enemy's grande and survive",'Drive with broken wheel','find naked player','Use no backpack','Get a shot on your head from enemy sniper and survive','Get flash greanaded from enenymy and surive','Sniper chiken dinneer','Spot a glitch',"don't let your teammate get knocked down",'Kill while in the air','Clutch 1 vs multiple','Put a vehicle in the building','Destroy a vehicle','Get a ghilie suit','Burst gun kill','back flip with vehicle',`Get a location of downed enemy's teammate`,'Kill a swimmer','Use only bandages','Use only drinks','Get a skinned gun','No healing throughout the game','use only the first weapon you find','Have identical weapons as a team']
+
+    
 
     }
 
@@ -371,7 +493,6 @@ export default {
 
     // console.log(this.candidate[1])
   },
-
   watch:{
     bingoList: {
       deep:true,
@@ -457,12 +578,19 @@ export default {
         console.log('touched list')
       },
     },
-  }
 
- 
+    userNum(){
+      console.log('just ogt data')
+        const ref = db.collection('user-counter')
+        ref.doc('b6YDm6PykPYGfIKptNKt').update({
+          TotalNum: this.userNum 
+        })
+      console.log('Sent data now')
+    },
+  },
 
-  
-}
+
+})
 
 </script>
 
@@ -612,6 +740,41 @@ table {
   margin-left: 10px;
   right:0;
 }
+
+.resetBtn{
+  background-color: #4682b4;
+  /* background-color: CornflowerBlue; Blue */
+  border: none;
+  color: white;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+  margin-left: 10px;
+  right:0;
+}
+
+
+.firstDiv{
+  /* margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); */
+}
+
+.counter{
+  color:white
+}
+
+.view-counter{
+
+}
+
 
 
 
