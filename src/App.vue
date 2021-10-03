@@ -11,6 +11,7 @@
   <title>Bingo</title>
 
   <link rel="stylesheet" type="text/css" href="bingocss.css" />
+  
 
   <!-- <script type="text/javascript" src="scripts/bingojs.js"></script> -->
 
