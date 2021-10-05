@@ -5,7 +5,8 @@
   <head>
     <link href='https://fonts.googleapis.com/css?family=Cambay' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
-  <meta charset="utf-8" />
+  <!-- <meta charset="utf-8" /> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 
   <title>Bingo</title>
@@ -636,8 +637,9 @@ p a {
 #bingotable {
   margin: 0 auto;
   text-align: center;
-  width: 700px;
-  height: 700px;
+  /* width: 700px; */
+  width: 70%;
+  height: 600px;
   border-collapse: collapse;
   background: white;
 }
@@ -661,7 +663,7 @@ th, td {
 .xmark span{
   position: absolute;
   color:red;
-  font-size:400%;
+  font-size:350%;
   text-align:center;
 }
 
